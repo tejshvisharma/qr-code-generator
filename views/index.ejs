@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #6e8efb, #a777e3);
+            color: #333;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(to right, #4a6cf7, #6a82fb);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .content {
+            display: flex;
+            flex-wrap: wrap;
+            padding: 30px;
+        }
+
+        .qr-form {
+            flex: 1;
+            min-width: 300px;
+            padding: 20px;
+        }
+
+        .qr-preview {
+            flex: 1;
+            min-width: 300px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #444;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            border-color: #6a82fb;
+            outline: none;
+        }
+
+        button {
+            background: linear-gradient(to right, #4a6cf7, #6a82fb);
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(106, 130, 251, 0.4);
+        }
+
+        .qr-code {
+            width: 200px;
+            height: 200px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            border: 1px solid #eee;
+            overflow: hidden;
+        }
+
+        .qr-code img {
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        .error {
+            background: #ffebee;
+            color: #c62828;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid #c62828;
+        }
+
+        .success {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid #2e7d32;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                flex-direction: column;
+            }
+
+            header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>QR Code Generator</h1>
+            <p>Create QR codes instantly for URLs, text, and more</p>
+        </header>
+
+        <div class="content">
+            <div class="qr-form">
+                <h2>Create Your QR Code</h2>
+                <p>Enter your content below and generate a QR code instantly</p>
+
+                <% if (error) { %>
+                    <div class="error">
+                        <%= error %>
+                    </div>
+                    <% } %>
+
+                        <form action="/generate" method="POST">
+                            <div class="form-group">
+                                <label for="text">Content to encode</label>
+                                <textarea id="text" name="text" rows="4" placeholder="Enter URL or text here..."
+                                    required><%= formData.text %></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="size">QR Code Size (pixels)</label>
+                                <input type="number" id="size" name="size" value="<%= formData.size %>" min="100"
+                                    max="1000">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="margin">Margin Size</label>
+                                <input type="number" id="margin" name="margin" value="<%= formData.margin %>" min="0"
+                                    max="10">
+                            </div>
+
+                            <button type="submit">
+                                Generate QR Code
+                            </button>
+                        </form>
+            </div>
+
+            <div class="qr-preview">
+                <h2>Your QR Code</h2>
+                <div class="qr-code">
+                    <% if (qrCode) { %>
+                        <img src="<%= qrCode %>" alt="Generated QR Code">
+                        <% } else { %>
+                            <div style="text-align: center; color: #888;">
+                                <svg width="64" height="64" viewBox="0 0 24 24" fill="#ccc">
+                                    <path
+                                        d="M3 11h8V3H3v8zm2-6h4v4H5V5zm8-2v8h8V3h-8zm6 6h-4V5h4v4zM3 21h8v-8H3v8zm2-6h4v4H5v-4zm13-2h-2v4h-4v2h6v-6zm-2-8h2v2h-2V5zm2 12h2v2h-2v-2zm-4-8h2v2h-2V9zm4 0h2v2h-2V9zm-8 8h2v2H9v-2zm4 0h2v2h-2v-2zm4 0h2v2h-2v-2z" />
+                                </svg>
+                                <p>Your QR code will appear here</p>
+                            </div>
+                            <% } %>
+                </div>
+
+                <% if (qrCode) { %>
+                    <div class="success">
+                        QR code generated successfully!
+                    </div>
+                    <button onclick="downloadQRCode()">
+                        Download QR Code
+                    </button>
+                    <% } else { %>
+                        <button disabled>
+                            Download QR Code
+                        </button>
+                        <% } %>
+            </div>
+        </div>
+
+        <footer>
+            <p>© 2025 QR Code Generator | Made with ❤️</p>
+        </footer>
+    </div>
+
+    <script>
+        function downloadQRCode() {
+            const qrCodeImg = document.querySelector('.qr-code img');
+            if (qrCodeImg) {
+                const link = document.createElement('a');
+                link.href = qrCodeImg.src;
+                link.download = 'qrcode.png';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        }
+    </script>
+</body>
+
+</html>
