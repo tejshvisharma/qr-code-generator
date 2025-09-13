@@ -74,6 +74,7 @@ npm start
 
 Contributions are always welcome!
     ```bash
+
     1. Fork the repo
 
     2. Create a new branch (feature/awesome-feature)
@@ -89,6 +90,7 @@ You’re free to use, modify, and distribute it with attribution.
 
 #❤️ Acknowledgements
     ```bash
+    
     Express.js
     – Web framework
 
